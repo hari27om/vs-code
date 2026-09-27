@@ -1,0 +1,152 @@
+{
+  "name": "spiderman-vscode",
+  "displayName": "Spider-Man 3D Companion",
+  "description": "A persistent autonomous 3D Spider-Man companion that swings through your VS Code window using real physics.",
+  "version": "0.0.1",
+  "publisher": "REPLACE_ME_PUBLISHER",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=18.0.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "spiderman.enable",
+        "title": "Spider-Man: Enable",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.disable",
+        "title": "Spider-Man: Disable",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.pause",
+        "title": "Spider-Man: Pause",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.resume",
+        "title": "Spider-Man: Resume",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.toggleClickThrough",
+        "title": "Spider-Man: Toggle Click-Through",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.reset",
+        "title": "Spider-Man: Reset",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.openSettings",
+        "title": "Spider-Man: Open Settings",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.restartCompanion",
+        "title": "Spider-Man: Restart Companion",
+        "category": "Spider-Man"
+      },
+      {
+        "command": "spiderman.debugPhysics",
+        "title": "Spider-Man: Debug Physics",
+        "category": "Spider-Man"
+      }
+    ],
+    "configuration": {
+      "title": "Spider-Man",
+      "properties": {
+        "spiderman.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Spider-Man companion."
+        },
+        "spiderman.physics.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the physics simulation (swing, gravity, momentum)."
+        },
+        "spiderman.swingSpeed": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0.1,
+          "maximum": 3.0,
+          "description": "Overall speed multiplier for swinging behavior."
+        },
+        "spiderman.activityReactions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow editor activity (save, typing, etc.) to probabilistically influence behavior mood."
+        },
+        "spiderman.renderQuality": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "description": "Rendering quality preset. Automatically reduced under performance pressure."
+        },
+        "spiderman.maxParticles": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum number of active particles (webs, dust, sparks)."
+        },
+        "spiderman.shadows": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable soft shadows where practical."
+        },
+        "spiderman.sound.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable audio. Disabled by default during early testing."
+        },
+        "spiderman.interactive": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable interactive mode (click/drag on Spider-Man). Off by default; click-through is the normal mode."
+        },
+        "spiderman.clickThrough": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, clicks pass through the overlay to VS Code underneath."
+        },
+        "spiderman.maxCharacterSize": {
+          "type": "number",
+          "default": 1.0,
+          "description": "Upper bound multiplier on character scale at NEAR depth."
+        },
+        "spiderman.showWebs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render visible webs for active attachments."
+        },
+        "spiderman.debugPhysics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the debug physics overlay (FPS, velocity, anchor, state, etc.)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node test/integration/protocol.test.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  }
+}

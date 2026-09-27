@@ -1,0 +1,13 @@
+{
+  "name": "spiderman-companion",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Phase 2 companion process: a transparent Electron window driven by the VS Code extension over stdio IPC. No 3D rendering yet — see ../README.md for phase status.",
+  "main": "window/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^44.0.0"
+  }
+}
