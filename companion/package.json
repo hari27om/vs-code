@@ -8,6 +8,8 @@
     "start": "electron ."
   },
   "dependencies": {
-    "electron": "^44.0.0"
+    "bufferutil": "^4.1.0",
+    "electron": "^44.0.0",
+    "three": "^0.186.1"
   }
 }

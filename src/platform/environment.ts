@@ -20,7 +20,7 @@ export interface EnvironmentReport {
   reason: string;
 }
 
-export function detectEnvironment(context: vscode.ExtensionContext): EnvironmentReport {
+export function detectEnvironment(_context: vscode.ExtensionContext): EnvironmentReport {
   // vscode.env.remoteName is set (e.g. "ssh-remote", "dev-container",
   // "codespaces") when the extension host is running remotely rather than
   // on the machine the UI is displayed on.

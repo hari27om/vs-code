@@ -5,19 +5,18 @@
  * Section 20 — Overlay Window Rules.
  * Section 50 — Companion Handshake.
  *
- * PHASE STATUS: Phase 2 ("Companion") only.
+ * PHASE STATUS: Phase 3 ("Full-screen tracking").
  *   - Real transparent, frameless, click-through, always-on-top window. [done]
  *   - Real HELLO / READY / CONFIG handshake over stdio. [done]
  *   - PAUSE / RESUME / WINDOW_BOUNDS / SHUTDOWN message handling. [done]
+ *   - Applies real VS Code bounds sent by the extension to keep the
+ *     overlay aligned to the editor window.
  *
  * Explicitly NOT in this file (later phases, per Section 67):
- *   - Following VS Code's actual window bounds automatically (Phase 3 —
- *     the extension doesn't track real bounds yet either; this file only
- *     applies bounds it is TOLD about via WINDOW_BOUNDS).
  *   - Any 3D rendering / Three.js (Phase 4).
  *   - Physics, webs, character, behavior (Phases 5-9).
- * The renderer/index.html loaded here is a static placeholder page that
- * says as much, so nothing here overclaims what's implemented.
+ * The renderer/index.html loaded here remains the placeholder page until
+ * the required tracking gate is verified and Phase 4 begins.
  */
 
 const path = require("path");
@@ -71,6 +70,10 @@ function createWindow() {
 
   // Rule 23 — default is click-through.
   win.setIgnoreMouseEvents(true, { forward: true });
+
+  win.once("ready-to-show", () => {
+    win.showInactive();
+  });
 
   win.loadFile(path.join(__dirname, "..", "renderer", "index.html"));
 
@@ -145,9 +148,10 @@ function handleMessage(message) {
   }
 }
 
+ipc.listen(handleMessage);
+
 app.whenReady().then(() => {
   mainWindow = createWindow();
-  ipc.listen(handleMessage);
   // The companion does not speak first beyond this point — Section 50's
   // handshake starts with the EXTENSION sending HELLO.
 });

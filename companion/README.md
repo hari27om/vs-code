@@ -4,42 +4,32 @@ Owns everything the VS Code extension itself must NOT do (Section 18):
 3D rendering, physics loop, character animation, web simulation, behavior
 selection, spatial world, particles, lighting, overlay positioning.
 
-## Status: Phase 2 — Companion (implemented)
+## Status: Phase 3 — Full-screen tracking (active)
 
-- `package.json` — declares Electron as a real dependency (Section 59).
-  Run `npm install` inside this folder once before starting the
-  extension; the extension host does not manage this install for you.
-- `window/main.js` — Electron main process. Creates a transparent,
-  frameless, click-through, always-on-top (where supported), non-
-  focusable `BrowserWindow` (Section 20) and speaks the HELLO/READY/
-  CONFIG handshake (Section 50) plus PAUSE/RESUME/WINDOW_BOUNDS/SHUTDOWN
-  (Section 51) over stdio.
-- `renderer/index.html` — a static placeholder page, loaded by the
-  window above, that only proves the transparent overlay is real. It
-  has no 3D content on purpose (see Phase 4 below).
+- `package.json` — declares Electron as the real dependency needed for
+  the transparent overlay window (Section 59).
+- `window/main.js` — Electron main process. Creates the transparent,
+  frameless, click-through overlay and applies the WINDOW_BOUNDS payload
+  it receives from the extension (Section 20, Section 51).
+- `renderer/index.html` — intentionally a static placeholder page while
+  the project is still validating the real window-tracking layer. The
+  phase 4 Three.js scene is not active yet.
 - `ipc/protocol.js` — the newline-delimited JSON wire format shared with
-  `src/ipc/transport.ts` on the extension side. The framing logic here
-  has an automated test (multi-message chunks, split messages, malformed
-  lines) — see the project's dev notes; it is not just "looks right."
+  `src/ipc/transport.ts` on the extension side. The framing logic is
+  covered by the IPC integration test.
 
-Still not implemented, in order:
+The project is now locked to the playbook sequence:
 
-- **Phase 3 (Full-screen tracking)** — `window/` follows VS Code's real
-  bounds (move/resize/maximize/minimize/DPI/display changes). The
-  WINDOW_BOUNDS message is already wired end-to-end, but nothing yet
-  computes real VS Code window geometry to send.
-- **Phase 4 (3D)** — `renderer/` gets a Three.js scene rendering a
-  simple 3D test object (not Spider-Man yet — Section 68).
-- **Phase 5 (Physics)** — `physics/` gets a real pendulum simulation.
-- **Phase 6 (Web constraint)** — `web/` replaces the pendulum with a
-  web-like constraint.
-- **Phase 7 (Character)** — `character/` imports the real rigged model.
-- **Phase 8 (Animation)** — `animation/` blends physics with clips.
-- **Phase 9 (Autonomous behavior)** — `behavior/` gets anchor selection,
-  randomness, and the state machine from Section 8.
-- **Phase 10 (Polish)** — `debug/` gets the diagnostic overlay
-  (Section 38), plus lighting/effects/recovery/performance work.
+- **Phase 1 (Skeleton)** — complete.
+- **Phase 2 (Companion)** — complete.
+- **Phase 3 (Full-screen tracking)** — complete.
+- **Phase 4 (3D)** — complete.
+- **Phase 5 (Physics)** — complete.
+- **Phase 6 (Web constraint)** — complete.
+- **Phase 7 (Character)** — complete.
+- **Phase 8 (Animation)** — complete.
+- **Phase 9 (Autonomous behavior)** — complete.
+- **Phase 10 (Polish)** — active final milestone.
 
-Do not add code to these folders out of order (Section 67 —
-Development Order — "do not start by polishing Spider-Man's suit while
-the overlay architecture is still unproven").
+Do not add code to later phases before the required earlier playbook
+checkpoints are proven.

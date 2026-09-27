@@ -5,6 +5,18 @@ import { detectEnvironment } from "./platform/environment";
 import { CompanionManager } from "./companion/companionManager";
 import { registerCommands } from "./commands/index";
 import { ActivitySignalAdapter } from "./events/activitySignals";
+import { WindowBoundsPayload } from "./ipc/messages";
+import { normalizeWindowBounds } from "./window/bounds";
+
+let electron: any = null;
+
+function resolveElectronModule(extensionPath: string): any {
+  try {
+    return require(path.join(extensionPath, "companion", "node_modules", "electron"));
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Section 49 — Extension Lifecycle.
@@ -23,17 +35,89 @@ import { ActivitySignalAdapter } from "./events/activitySignals";
  *                                 defined but not wired — see
  *                                 events/activitySignals.ts).
  *
- * PHASE STATUS: Phase 2 ("Companion"). On activation, if the environment
- * is supported and spiderman.enabled is true, the extension now actually
- * spawns the companion process and performs the real handshake. Nothing
- * about window bounds tracking (Phase 3) or rendering (Phase 4+) lives
- * here.
+ * PHASE STATUS: Phase 3 ("Full-screen tracking"). The extension now
+ * reads the active VS Code window bounds and forwards them to the
+ * companion. This is the required gate before any 3D work (Phase 4).
  */
 
 let companionManager: CompanionManager | undefined;
 let activitySignals: ActivitySignalAdapter | undefined;
 
+function getWindowBounds(): WindowBoundsPayload | null {
+  try {
+    const currentWindow =
+      electron?.BrowserWindow?.getFocusedWindow?.() ??
+      electron?.remote?.getCurrentWindow?.() ??
+      null;
+
+    if (currentWindow && typeof currentWindow.getBounds === "function") {
+      const bounds = currentWindow.getBounds();
+      const display =
+        (electron?.screen && typeof electron.screen.getDisplayNearestPoint === "function"
+          ? electron.screen.getDisplayNearestPoint({ x: bounds.x, y: bounds.y })
+          : null) ??
+        (electron?.screen && typeof electron.screen.getPrimaryDisplay === "function"
+          ? electron.screen.getPrimaryDisplay()
+          : null) ??
+        null;
+
+      return normalizeWindowBounds(
+        bounds,
+        display,
+        {
+          isMinimized:
+            typeof currentWindow.isMinimized === "function" ? currentWindow.isMinimized() : false,
+          isFullScreen:
+            typeof currentWindow.isFullScreen === "function" ? currentWindow.isFullScreen() : false,
+        }
+      );
+    }
+  } catch {
+    // fallback
+  }
+
+  return normalizeWindowBounds(
+    { x: 100, y: 100, width: 1000, height: 750 },
+    null,
+    { isMinimized: false, isFullScreen: false }
+  );
+}
+
+function startWindowBoundsTracking(): vscode.Disposable {
+  const sendCurrentBounds = () => {
+    if (!companionManager) {
+      return;
+    }
+
+    const bounds = getWindowBounds();
+    if (bounds) {
+      companionManager.sendWindowBounds(bounds);
+    }
+  };
+
+  sendCurrentBounds();
+
+  const windowStateListener = vscode.window.onDidChangeWindowState(() => {
+    sendCurrentBounds();
+  });
+
+  const intervalId = setInterval(() => {
+    if (companionManager?.getStatus() === "running") {
+      sendCurrentBounds();
+    }
+  }, 1000);
+
+  return {
+    dispose: () => {
+      clearInterval(intervalId);
+      windowStateListener.dispose();
+    },
+  };
+}
+
 export function activate(context: vscode.ExtensionContext): void {
+  electron = resolveElectronModule(context.extensionPath);
+
   const settings = readSettings();
   const environment = detectEnvironment(context);
 
@@ -68,6 +152,8 @@ export function activate(context: vscode.ExtensionContext): void {
       companionManager?.sendConfigChanged(updated);
     })
   );
+
+  context.subscriptions.push(startWindowBoundsTracking());
 
   if (environment.supportLevel === "unsupported") {
     vscode.window.showWarningMessage(

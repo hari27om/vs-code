@@ -36,10 +36,13 @@ export class ActivitySignalAdapter implements vscode.Disposable {
    */
   wire(): void {
     this.wired = true;
-    // Phase 2/3 TODO: subscribe to real VS Code events and forward
-    // high-level kinds via this.listener, per Section 24's example:
-    //   save event -> small probability -> Spider-Man performs a flourish
-    // Do NOT let these signals control physics directly (Section 25).
+    const activeListener = this.listener;
+    if (activeListener) {
+      // Phase 2/3 TODO: subscribe to real VS Code events and forward
+      // high-level kinds via this.listener, per Section 24's example:
+      //   save event -> small probability -> Spider-Man performs a flourish
+      // Do NOT let these signals control physics directly (Section 25).
+    }
   }
 
   isWired(): boolean {

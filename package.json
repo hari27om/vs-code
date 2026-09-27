@@ -1,17 +1,35 @@
 {
   "name": "spiderman-vscode",
   "displayName": "Spider-Man 3D Companion",
-  "description": "A persistent autonomous 3D Spider-Man companion that swings through your VS Code window using real physics.",
-  "version": "0.0.1",
-  "publisher": "REPLACE_ME_PUBLISHER",
-  "private": true,
+  "description": "A local desktop companion that adds a playful 3D Spider-Man presence to your VS Code workspace.",
+  "version": "0.1.0",
+  "icon": "icon.png",
+  "publisher": "your-publisher-id",
+  "private": false,
   "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/spiderman-vscode"
+  },
+  "homepage": "https://github.com/your-org/spiderman-vscode",
+  "bugs": {
+    "url": "https://github.com/your-org/spiderman-vscode/issues"
+  },
   "engines": {
     "vscode": "^1.85.0",
     "node": ">=18.0.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "spider-man",
+    "companion",
+    "productivity",
+    "visualization",
+    "overlay",
+    "desktop"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
@@ -78,9 +96,9 @@
         },
         "spiderman.swingSpeed": {
           "type": "number",
-          "default": 1.0,
+          "default": 1,
           "minimum": 0.1,
-          "maximum": 3.0,
+          "maximum": 3,
           "description": "Overall speed multiplier for swinging behavior."
         },
         "spiderman.activityReactions": {
@@ -90,7 +108,11 @@
         },
         "spiderman.renderQuality": {
           "type": "string",
-          "enum": ["low", "medium", "high"],
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
           "default": "medium",
           "description": "Rendering quality preset. Automatically reduced under performance pressure."
         },
@@ -121,7 +143,7 @@
         },
         "spiderman.maxCharacterSize": {
           "type": "number",
-          "default": 1.0,
+          "default": 1,
           "description": "Upper bound multiplier on character scale at NEAR depth."
         },
         "spiderman.showWebs": {
@@ -138,15 +160,20 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm test",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
-    "test": "node test/integration/protocol.test.js"
+    "test": "node test/integration/protocol.test.js && node test/integration/phase3-window-bounds.test.js && node test/integration/phase4-3d-scene.test.js && node test/integration/phase5-physics.test.js && node test/integration/phase6-web-constraint.test.js && node test/integration/phase7-character.test.js && node test/integration/phase8-animation.test.js && node test/integration/phase9-autonomous-behavior.test.js && node test/integration/phase10-polish.test.js",
+    "package:vsix": "npx @vscode/vsce package"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^4.0.0",
     "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "bufferutil": "^4.1.0"
   }
 }

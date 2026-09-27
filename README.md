@@ -1,97 +1,106 @@
-# Spider-Man 3D VS Code Extension
+# Spider-Man 3D Companion
 
-A VS Code extension that brings a persistent, autonomous 3D Spider-Man
-companion into the editor — swinging through the window using real-time
-physics. Full product spec: see `PLAYBOOK.md` (v1.0) in this repo.
+A local desktop companion for VS Code that adds a lightweight, animated Spider-Man-inspired overlay to the editor experience. The project combines a transparent companion window, a 3D renderer, physical motion, and editor-aware behavior while staying non-intrusive during coding.
 
-## Current status: Phase 2 — Companion (per Section 67, Development Order)
+## Features
 
-This is still **infrastructure, not a working pet**. What exists right
-now:
+- Transparent companion window running alongside VS Code
+- Local IPC connection between the extension host and the companion process
+- 3D stage and character rendering with real-time motion
+- Physics-driven motion and web-like swing behavior
+- Editor-aware activity reactions and autonomous movement patterns
+- Click-through and focus-safe overlay behavior for non-disruptive use
+- Settings for quality, physics, and companion behavior
 
-- ✅ VS Code extension activates/deactivates cleanly (Phase 1).
-- ✅ All 9 commands from Section 36 are registered and discoverable via
-  the Command Palette. Enable/Disable/Pause/Resume/Toggle Click-Through/
-  Restart Companion now genuinely talk to the companion process. Reset
-  and Debug Physics remain explicit stubs (no physics system exists
-  until Phase 5).
-- ✅ All settings from Section 37 are declared, readable, and live
-  setting changes are forwarded to the companion over IPC.
-- ✅ Environment detection (Section 21): desktop Windows/macOS
-  (supported), Linux (experimental — Wayland has no always-on-top),
-  remote/Codespaces/Web (unsupported, companion refuses to start).
-- ✅ **A real companion process** (`companion/`): an Electron app the
-  extension spawns, performs the HELLO → READY → CONFIG handshake with
-  (Section 50), and can PAUSE / RESUME / SHUTDOWN over stdio IPC
-  (Section 51). Crash detection with a capped auto-restart is
-  implemented (Section 48).
-- ✅ **A real transparent overlay window**: frameless, click-through by
-  default, always-on-top where the OS/compositor supports it,
-  non-focusable — loading a placeholder page that only proves the
-  window itself works (Section 20).
-- ❌ No window-bounds tracking yet (Phase 3) — the overlay does not yet
-  follow VS Code's position/size. ❌ No 3D rendering, physics,
-  character, or behavior AI (Phases 4–10).
+## Project status
 
-**Nothing in this repo pretends to do more than this.** Every stub says
-so explicitly (in code comments and in-app messages) rather than faking
-functionality — see `companion/README.md`, `test/README.md`.
+Current status: Phase 10 — Polish.
 
-## Development order (do not reorder — Section 67)
+This repository is aligned to the project playbook and has passed the verified development phases in order. It is currently in a release-readiness baseline: the core implementation and regression checks are in place, but final Marketplace publication still requires the remaining packaging, legal, and identity checks described in the release checklist.
 
-1. **Skeleton** — this repo, right now.
-2. **Companion** — launch a local transparent overlay window; extension
-   <-> companion IPC handshake.
-3. **Full-screen tracking** — overlay follows VS Code move/resize/
-   maximize/minimize/DPI/display changes.
-4. **3D** — Three.js renders a simple test object (not Spider-Man) to
-   prove transparent window + 3D + depth + FPS (Section 68).
-5. **Physics** — a real pendulum: gravity, velocity, momentum.
-6. **Web constraint** — replace the pendulum with a web-like joint.
-7. **Character** — import the real rigged 3D model.
-8. **Animation** — blend physics state with animation clips.
-9. **Autonomous behavior** — anchor selection, randomness, anti-
-   repetition, mood (Section 26).
-10. **Polish** — lighting, effects, recovery, settings UI, performance
-    adaptation.
+## Supported environments
 
-## Running Phase 2
+- Windows: supported
+- macOS: supported
+- Linux: experimental only
+- Remote / web / Codespaces: not supported
 
-The extension host and the companion are two separate npm projects —
-install both:
+The companion is designed for local desktop usage only. It is not intended for remote or browser-based editor environments.
+
+## Installation
+
+### Local development
 
 ```bash
-npm install                 # extension host (root)
+npm install
 npm run compile
-cd companion && npm install # companion (Electron app)
-cd ..
 ```
 
-Then press `F5` in VS Code (or Run → Start Debugging) to launch the
-Extension Development Host. If `spiderman.enabled` is true (the
-default), the companion starts automatically on activation and you
-should see a small red placeholder badge appear near the top-left of
-your screen — that's the transparent overlay window proving itself,
-not the pet. You can also drive it manually via the Command Palette:
-`Spider-Man: Enable`, `Disable`, `Pause`, `Resume`, `Toggle
-Click-Through`, `Restart Companion`.
+If you also want to run the companion app directly:
 
-Note: the companion window does not follow VS Code's position/size yet
-(that's Phase 3), so it will stay wherever it opened.
-
-## The five non-negotiable rules (Section 72)
-
-```
-REAL 3D + REAL PHYSICS + FULL VS CODE PLAYGROUND
-+ AUTONOMOUS BEHAVIOR + ZERO INTERFERENCE WITH CODING
+```bash
+cd companion
+npm install
 ```
 
-If a future change conflicts with these, the change loses — not the
-rules.
+Then launch the extension in VS Code with the Extension Development Host:
 
-## Before public release
+- Press `F5`, or
+- choose Run and Debug > Start Debugging
 
-Read `PLAYBOOK.md` Section 41 (Spider-Man IP Rule) before distributing
-this extension anywhere public. Using Marvel's character/suit/logo
-assets is fine for private prototyping under the asset's own license,
-but is not automatically permitted for Marketplace release.
+When the companion is enabled, the overlay process should start automatically and remain visually separate from the editor surface.
+
+## Commands
+
+The extension contributes commands for enabling, disabling, pausing, resuming, resetting, and restarting the companion. These are available from the Command Palette:
+
+- Spider-Man: Enable
+- Spider-Man: Disable
+- Spider-Man: Pause
+- Spider-Man: Resume
+- Spider-Man: Restart Companion
+- Spider-Man: Open Settings
+
+## Configuration
+
+The extension exposes settings such as:
+
+```json
+{
+  "spiderman.enabled": true,
+  "spiderman.clickThrough": true,
+  "spiderman.renderQuality": "medium",
+  "spiderman.physics.enabled": true,
+  "spiderman.activityReactions": true
+}
+```
+
+## Verification and packaging
+
+Build and test locally with:
+
+```bash
+npm run compile
+npm test
+```
+
+Package a VSIX locally with:
+
+```bash
+npm run package:vsix
+```
+
+## Repository notes
+
+- Source specification: `PLAYBOOK.md`
+- Release checklist: `RELEASE_CHECKLIST.md`
+- Extension manifest: `package.json`
+- Companion app: `companion/`
+
+## Legal and publishing note
+
+Before any public Marketplace publication, confirm the licensing, asset provenance, and publisher identity requirements in `PLAYBOOK.md` and the release checklist. This repository is not yet a final public distribution without those checks.
+
+## License
+
+This project is distributed under the license defined in the repository. Refer to `LICENSE` for full terms.

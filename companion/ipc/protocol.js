@@ -18,6 +18,8 @@
  * writes to stdout. Use logToStderr() for anything diagnostic instead.
  */
 
+const readline = require("readline");
+
 const PROTOCOL_VERSION = "1.0";
 
 function encode(type, payload) {
@@ -38,27 +40,39 @@ function logToStderr(...args) {
   process.stderr.write("[companion] " + args.map(String).join(" ") + "\n");
 }
 
+const fs = require("fs");
+
+function getInputStream() {
+  if (process.versions && process.versions.electron && process.platform === "win32") {
+    try {
+      return fs.createReadStream(null, { fd: 0 });
+    } catch {
+      // fallback
+    }
+  }
+  return process.stdin;
+}
+
 /**
  * Attaches a line-buffered JSON parser to stdin and calls onMessage for
  * each well-formed message. Malformed lines are logged to stderr and
  * skipped rather than crashing the process (Section 34 — Recovery).
  */
 function listen(onMessage) {
-  let buffer = "";
-  process.stdin.setEncoding("utf8");
-  process.stdin.on("data", (chunk) => {
-    buffer += chunk;
-    let newlineIndex;
-    while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-      const line = buffer.slice(0, newlineIndex).trim();
-      buffer = buffer.slice(newlineIndex + 1);
-      if (!line) continue;
-      try {
-        const message = JSON.parse(line);
-        onMessage(message);
-      } catch (err) {
-        logToStderr("received malformed IPC line, ignoring:", line);
-      }
+  const input = getInputStream();
+  const rl = readline.createInterface({
+    input,
+    terminal: false,
+  });
+
+  rl.on("line", (rawLine) => {
+    const line = rawLine.trim();
+    if (!line) return;
+    try {
+      const message = JSON.parse(line);
+      onMessage(message);
+    } catch (err) {
+      logToStderr("received malformed IPC line, ignoring:", line);
     }
   });
 }

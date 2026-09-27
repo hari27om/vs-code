@@ -5,6 +5,7 @@ import { EventEmitter } from "events";
 import { EnvironmentReport } from "../platform/environment";
 import { ChildProcessTransport } from "../ipc/transport";
 import { SpidermanSettings } from "../config/settings";
+import { WindowBoundsPayload } from "../ipc/messages";
 
 /**
  * Sections 17-18 — the extension starts/stops the companion process and
@@ -101,8 +102,14 @@ export class CompanionManager extends EventEmitter implements vscode.Disposable 
     const electronBinary = this.resolveElectronBinary();
     const mainScript = path.join(this.companionDir, "window", "main.js");
 
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.ELECTRON_RUN_AS_NODE;
+    delete cleanEnv.ELECTRON_NO_ATTACH_CONSOLE;
+    delete cleanEnv.NODE_OPTIONS;
+
     const child = spawn(electronBinary, [mainScript], {
       cwd: this.companionDir,
+      env: cleanEnv,
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: false,
     }) as ChildProcessWithoutNullStreams;
@@ -215,6 +222,12 @@ export class CompanionManager extends EventEmitter implements vscode.Disposable 
         clickThrough: settings.clickThrough,
         renderQuality: settings.renderQuality,
       });
+    }
+  }
+
+  sendWindowBounds(bounds: WindowBoundsPayload): void {
+    if (this.status === "running" && this.transport) {
+      this.transport.send("WINDOW_BOUNDS", bounds);
     }
   }
 
